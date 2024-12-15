@@ -21,6 +21,7 @@ public class RoleController {
     }
     @PostMapping
     public ResponseEntity<RoleDTO> createRole(@RequestBody RoleDTO role) {
+        System.out.println("hello");
         return ResponseEntity.ok(roleService.addRole(role));
     }
 }

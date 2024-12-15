@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 @Transactional
@@ -27,10 +27,13 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleDTO addRole(RoleDTO role) {
-        roleRepo.findByName(role.getName()).orElseThrow(
-                ()-> new IllegalArgumentException("This role already exist")
+        roleRepo.findByName(role.getName()).ifPresent(
+                existingRole -> {
+                    throw new IllegalArgumentException("This role already exists");
+                }
         );
         Role roleSaved = roleRepo.save(roleMapper.toEntity(role));
         return roleMapper.toDto(roleSaved);
     }
+
 }
