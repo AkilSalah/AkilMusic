@@ -26,11 +26,11 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public RoleDTO addRole(Role role) {
+    public RoleDTO addRole(RoleDTO role) {
         roleRepo.findByName(role.getName()).orElseThrow(
                 ()-> new IllegalArgumentException("This role already exist")
         );
-        Role roleSaved = roleRepo.save(role);
+        Role roleSaved = roleRepo.save(roleMapper.toEntity(role));
         return roleMapper.toDto(roleSaved);
     }
 }
