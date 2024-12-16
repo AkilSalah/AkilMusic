@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class AlbumController {
     private final AlbumService albumService;
 
-    @GetMapping("/albums")
+    @GetMapping("/user/albums")
     public ResponseEntity<?> getAllAlbums(
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
         try {
@@ -32,7 +32,7 @@ public class AlbumController {
         }
     }
 
-    @GetMapping("/albums/search/title")
+    @GetMapping("/user/albums/search/title")
     public ResponseEntity<?> searchAlbumsByTitle(
             @RequestParam String titre,
             @PageableDefault(page = 0, size = 10) Pageable pageable) {
@@ -46,7 +46,7 @@ public class AlbumController {
         }
     }
 
-    @GetMapping("/albums/search/artist")
+    @GetMapping("/user/albums/search/artist")
     public ResponseEntity<?> searchAlbumsByArtist(
             @RequestParam String artiste,
             @PageableDefault(page = 0, size = 10) Pageable pageable) {
@@ -60,7 +60,7 @@ public class AlbumController {
         }
     }
 
-    @GetMapping("/albums/filter/year")
+    @GetMapping("/user/albums/filter/year")
     public ResponseEntity<?> filterAlbumsByYear(
             @RequestParam Integer annee,
             @PageableDefault(page = 0, size = 10) Pageable pageable) {
@@ -74,7 +74,7 @@ public class AlbumController {
         }
     }
 
-    @GetMapping("/albums/{id}")
+    @GetMapping("/user/albums/{id}")
     public ResponseEntity<?> getAlbumById(@PathVariable String id) {
         try {
             AlbumDTO album = albumService.getAlbumById(id);
