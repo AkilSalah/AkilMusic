@@ -14,26 +14,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/admin/albums")
-@PreAuthorize("hasRole('ADMIN')")  // Ensure user has ADMIN role
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class AlbumController {
     private final AlbumService albumService;
-    private final AlbumRepository albumRepository;
 
-    @PostMapping
-    public ResponseEntity<?> createAlbum(@RequestBody Album album) {
-        try {
-            Album savedAlbum = albumRepository.save(album);
-            return ResponseEntity.ok(savedAlbum);
-        } catch (Exception e) {
-            return ResponseEntity
-                .internalServerError()
-                .body("Error creating album: " + e.getMessage());
-        }
-    }
-
-    @GetMapping
+    @GetMapping("/albums")
     public ResponseEntity<?> getAllAlbums(
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
         try {
@@ -43,6 +29,101 @@ public class AlbumController {
             return ResponseEntity
                     .internalServerError()
                     .body("Error fetching albums: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/albums/search/title")
+    public ResponseEntity<?> searchAlbumsByTitle(
+            @RequestParam String titre,
+            @PageableDefault(page = 0, size = 10) Pageable pageable) {
+        try {
+            Page<AlbumDTO> albums = albumService.searchAlbumsByTitle(titre, pageable);
+            return ResponseEntity.ok(albums);
+        } catch (Exception e) {
+            return ResponseEntity
+                    .internalServerError()
+                    .body("Error searching albums by title: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/albums/search/artist")
+    public ResponseEntity<?> searchAlbumsByArtist(
+            @RequestParam String artiste,
+            @PageableDefault(page = 0, size = 10) Pageable pageable) {
+        try {
+            Page<AlbumDTO> albums = albumService.searchAlbumsByArtist(artiste, pageable);
+            return ResponseEntity.ok(albums);
+        } catch (Exception e) {
+            return ResponseEntity
+                    .internalServerError()
+                    .body("Error searching albums by artist: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/albums/filter/year")
+    public ResponseEntity<?> filterAlbumsByYear(
+            @RequestParam Integer annee,
+            @PageableDefault(page = 0, size = 10) Pageable pageable) {
+        try {
+            Page<AlbumDTO> albums = albumService.filterAlbumsByYear(annee, pageable);
+            return ResponseEntity.ok(albums);
+        } catch (Exception e) {
+            return ResponseEntity
+                    .internalServerError()
+                    .body("Error filtering albums by year: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/albums/{id}")
+    public ResponseEntity<?> getAlbumById(@PathVariable String id) {
+        try {
+            AlbumDTO album = albumService.getAlbumById(id);
+            return ResponseEntity.ok(album);
+        } catch (Exception e) {
+            return ResponseEntity
+                    .internalServerError()
+                    .body("Error fetching album by ID: " + e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin/albums")
+    public ResponseEntity<?> createAlbum(@RequestBody AlbumDTO albumDTO) {
+        try {
+            AlbumDTO createdAlbum = albumService.createAlbum(albumDTO);
+            return ResponseEntity.ok(createdAlbum);
+        } catch (Exception e) {
+            return ResponseEntity
+                    .internalServerError()
+                    .body("Error creating album: " + e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/admin/albums/{id}")
+    public ResponseEntity<?> updateAlbum(
+            @PathVariable String id,
+            @RequestBody AlbumDTO albumDTO) {
+        try {
+            AlbumDTO updatedAlbum = albumService.updateAlbum(id, albumDTO);
+            return ResponseEntity.ok(updatedAlbum);
+        } catch (Exception e) {
+            return ResponseEntity
+                    .internalServerError()
+                    .body("Error updating album: " + e.getMessage());
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/admin/albums/{id}")
+    public ResponseEntity<?> deleteAlbum(@PathVariable String id) {
+        try {
+            albumService.deleteAlbum(id);
+            return ResponseEntity.ok("Album deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity
+                    .internalServerError()
+                    .body("Error deleting album: " + e.getMessage());
         }
     }
 }
