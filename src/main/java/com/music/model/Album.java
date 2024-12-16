@@ -17,6 +17,6 @@ public class Album {
     private String artiste;
     private int annee;
     
-    @DBRef
+    @DBRef(lazy = true)
     private List<Chanson> chansons;
 }

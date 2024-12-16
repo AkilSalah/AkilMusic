@@ -7,6 +7,7 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", uses = {ChansonMapper.class})
 public interface AlbumMapper {
+
     @Mapping(target = "chansons", source = "chansons")
     AlbumDTO toDto(Album album);
 

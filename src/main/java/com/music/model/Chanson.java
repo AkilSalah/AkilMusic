@@ -16,6 +16,6 @@ public class Chanson {
     private Integer duree;  
     private Integer trackNumber;
     
-    @DBRef
+    @DBRef(lazy = true)
     private Album album;
 }

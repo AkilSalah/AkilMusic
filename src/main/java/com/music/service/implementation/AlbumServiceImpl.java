@@ -46,6 +46,9 @@ public class AlbumServiceImpl implements AlbumService {
     public AlbumDTO getAlbumById(String id) {
         Album album = albumRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Album not found with id: " + id));
+        if (album.getChansons() != null) {
+            album.getChansons().size();
+        }
         return albumMapper.toDto(album);
     }
 
