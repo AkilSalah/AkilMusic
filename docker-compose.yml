@@ -4,7 +4,7 @@ services:
   app:
     build: .
     ports:
-      - "8089:8080"
+      - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/music-akil
@@ -21,6 +21,21 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+    networks:
+      - app-network
+    command: ["mongod", "--noauth"]
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongodb:27017/music-akil
+      ME_CONFIG_BASICAUTH: false
+    depends_on:
+      - mongodb
     networks:
       - app-network
 
@@ -45,4 +60,4 @@ volumes:
   mongodb_data:
   sonarqube_data:
   sonarqube_extensions:
-  sonarqube_logs: 
+  sonarqube_logs:

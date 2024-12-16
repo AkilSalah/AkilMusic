@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,59 +39,49 @@ public class AuthController {
     public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
         try {
             if (userRepository.existsByLogin(userDTO.getLogin())) {
-                throw new ResourceAlreadyExistsException("Username already exists");
+                return ResponseEntity.badRequest().body("Username already exists");
             }
+            System.out.println("Requested roles: " + userDTO.getRoleNames());
 
-            // First, find or create the USER role
-            Role userRole = mongoTemplate.findOne(
-                Query.query(Criteria.where("name").is("USER")),
-                Role.class,
-                "roles"
+            List<Role> existingRoles = mongoTemplate.find(
+                    Query.query(Criteria.where("name").in(userDTO.getRoleNames())),
+                    Role.class,
+                    "roles"
             );
 
-            if (userRole == null) {
-                userRole = new Role();
-                userRole.setName("USER");
-                userRole = mongoTemplate.save(userRole, "roles");
+            if (existingRoles.size() != userDTO.getRoleNames().size()) {
+                return ResponseEntity.badRequest().body("One or more roles do not exist");
             }
+            System.out.println("Existing roles: " + existingRoles);
 
-            // Create new user
             User user = new User();
             user.setLogin(userDTO.getLogin());
             user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
             user.setActive(true);
-
-            // Set roles
-            Set<Role> roles = new HashSet<>();
-            roles.add(userRole);
-            user.setRoles(roles);
-
-            // Save user
+            user.setRoles(new HashSet<>(existingRoles));
             user = userRepository.save(user);
 
-            // Generate token
+            System.out.println("Saved user: " + user);
+
             String token = jwtService.generateToken(user);
-            
-            // Return complete user information
+
             return ResponseEntity.ok(UserDTO.builder()
                     .id(user.getId())
                     .login(user.getLogin())
                     .active(user.isEnabled())
-                    .roles(user.getRoles().stream()
-                        .map(role -> RoleDTO.builder()
-                            .id(role.getId())
-                            .name(role.getName())
-                            .build())
-                        .collect(Collectors.toSet()))
+                    .roles(existingRoles.stream()
+                            .map(role -> new RoleDTO(role.getId(), role.getName()))
+                            .collect(Collectors.toSet()))
                     .token(token)
                     .build());
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity
-                .internalServerError()
-                .body("Error during registration: " + e.getMessage());
+                    .internalServerError()
+                    .body("Error during registration: " + e.getMessage());
         }
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
