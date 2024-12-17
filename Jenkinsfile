@@ -48,19 +48,7 @@ pipeline {
                     sh 'docker --version'
                 }
             }
-               stage('Install Dependencies') {
-                          steps {
-                              script {
-                                  sh '''
-                                  # Install jq if it's missing
-                                  if ! command -v jq &> /dev/null; then
-                                      sudo apt-get update
-                                      sudo apt-get install -y jq
-                                  fi
-                                  '''
-                              }
-                          }
-                      }
+
 
                       stage('Install Docker Compose') {
                           steps {
