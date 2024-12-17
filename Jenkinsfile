@@ -49,22 +49,6 @@ pipeline {
                 }
             }
 
-
-                      stage('Install Docker Compose') {
-                          steps {
-                              script {
-                                  sh '''
-                                  # Install Docker Compose if it's not installed
-                                  if ! command -v docker-compose &> /dev/null; then
-                                      curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /tmp/docker-compose
-                                      chmod +x /tmp/docker-compose
-                                       mv /tmp/docker-compose /usr/local/bin/docker-compose
-                                  fi
-                                  '''
-                              }
-                          }
-                      }
-
             stage('Deploy') {
                 steps {
                     echo "Deploying the app..."
