@@ -13,74 +13,56 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-                sh 'echo "Code checked out successfully!"'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                sh 'mvn clean package -DskipTests'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                sh 'mvn test'
-            }
-            post {
-                always {
-                    junit '**/target/surefire-reports/*.xml'
+            stage('Checkout') {
+                steps {
+                    echo "Checking out the code..."
+                    checkout scm
                 }
             }
-        }
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('SonarQube') {
+            stage('Build') {
+                steps {
+                    echo "Building the application..."
+                    sh 'mvn clean package -DskipTests'
+                }
+            }
+
+            stage('Test') {
+                steps {
+                    echo "Running tests..."
+                    sh 'mvn test'
+                }
+                post {
+                    always {
+                        junit '**/target/surefire-reports/*.xml'
+                    }
+                }
+            }
+
+            stage('Debug') {
+                steps {
+                    echo "Running Debug Info..."
+                    sh 'printenv'
+                    sh 'mvn --version'
+                    sh 'docker --version'
+                }
+            }
+
+            stage('Deploy') {
+                steps {
+                    echo "Deploying the app..."
                     sh '''
-                        echo "Starting SonarQube Analysis..."
-                        mvn sonar:sonar \
-                        -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                        -Dsonar.host.url=http://sonarqube:9000 \
-                        -Dsonar.login=${SONAR_TOKEN}
-                    '''
-                }
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                script {
-                    sh '''
-                        echo "Deploying application..."
                         docker-compose down || true
                         docker-compose up -d
                     '''
                 }
             }
         }
-    }
 
-    post {
-        always {
-            cleanWs()
-        }
-        success {
-            echo 'Pipeline succeeded!'
-        }
-        failure {
-            echo 'Pipeline failed!'
+        post {
+            always {
+                echo "Cleaning workspace..."
+                cleanWs()
+            }
         }
     }
-}
