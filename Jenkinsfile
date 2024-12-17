@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'sonify-app'
+        DOCKER_IMAGE = 'akilmusic-app'
         DOCKER_TAG = "${BUILD_NUMBER}"
         SONAR_PROJECT_KEY = 'sonify'
     }
