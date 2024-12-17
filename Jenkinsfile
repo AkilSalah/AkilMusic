@@ -10,19 +10,27 @@ pipeline {
     tools {
         maven 'Maven'
         jdk 'JDK'
-
     }
 
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
+                sh 'echo "Code checked out successfully!"'
             }
         }
 
         stage('Build') {
             steps {
                 sh 'mvn clean package -DskipTests'
+            }
+        }
+
+        stage('Debug') {
+            steps {
+                sh 'printenv'
+                sh 'mvn --version'
+                sh 'docker --version'
             }
         }
 
@@ -45,12 +53,13 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh """
+                    sh '''
+                        echo "Starting SonarQube Analysis..."
                         mvn sonar:sonar \
                         -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                         -Dsonar.host.url=http://sonarqube:9000 \
-                        -Dsonar.login=\${SONAR_TOKEN}
-                    """
+                        -Dsonar.login=${SONAR_TOKEN}
+                    '''
                 }
             }
         }
@@ -66,10 +75,11 @@ pipeline {
         stage('Deploy') {
             steps {
                 script {
-                    sh """
+                    sh '''
+                        echo "Deploying application..."
                         docker-compose down || true
                         docker-compose up -d
-                    """
+                    '''
                 }
             }
         }
