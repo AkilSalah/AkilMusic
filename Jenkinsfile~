@@ -26,6 +26,14 @@ pipeline {
             }
         }
 
+        stage('Debug') {
+            steps {
+                sh 'printenv'
+                sh 'mvn --version'
+                sh 'docker --version'
+            }
+        }
+
         stage('Test') {
             steps {
                 sh 'mvn test'
