@@ -8,8 +8,9 @@ pipeline {
     }
 
     tools {
-        maven 'MAVEN_HOME'
-        jdk 'JAVA_HOME'
+        maven 'Maven'
+        jdk 'JDK'
+        docker 'Docker'
     }
 
     stages {
