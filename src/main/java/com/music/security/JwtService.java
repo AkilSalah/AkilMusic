@@ -1,5 +1,7 @@
 package com.music.security;
 
+import com.music.dto.RoleDTO;
+import com.music.model.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -33,10 +35,13 @@ public class JwtService {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles",userDetails.getAuthorities());
+        return generateToken(claims, userDetails);
     }
 
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        extraClaims.put("role",userDetails.getAuthorities());
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())

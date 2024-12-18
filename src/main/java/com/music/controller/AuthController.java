@@ -9,6 +9,7 @@ import com.music.model.Role;
 import com.music.model.User;
 import com.music.security.JwtService;
 import com.music.service.interfaces.AuthInterface;
+import com.music.service.interfaces.BlackListToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 public class AuthController {
 
     private final AuthInterface authService;
+    private final BlackListToken blackListToken;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserDTO userDTO) {
@@ -60,4 +62,13 @@ public class AuthController {
                     .body("Error during login: " + e.getMessage());
         }
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader(name = "Authorization") String token ) {
+        String jwt = token.substring(7);
+        blackListToken.AddToken(jwt);
+        return ResponseEntity.ok().body("Successfully logged out");
+    }
+
+
 }

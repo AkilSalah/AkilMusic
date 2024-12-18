@@ -1,5 +1,6 @@
 package com.music.security;
 
+import com.music.service.interfaces.BlackListToken;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +22,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final BlackListToken blackListToken;
 
     @Override
     protected void doFilterInternal(
@@ -50,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (userLogin != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userLogin);
             
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+            if (jwtService.isTokenValid(jwt, userDetails ) && !blackListToken.GetTokens(jwt)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                     userDetails,
                     null,
